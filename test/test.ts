@@ -11,10 +11,10 @@ describe('vue-class-component', () => {
 
     @Component
     class MyComp extends Vue {
-      created () {
+      created() {
         created = true
       }
-      destroyed () {
+      destroyed() {
         destroyed = true
       }
     }
@@ -33,7 +33,7 @@ describe('vue-class-component', () => {
     class MyComp extends Vue {
       static options: any
 
-      beforeRouteEnter () {
+      beforeRouteEnter() {
         return 'beforeRouteEnter'
       }
     }
@@ -71,7 +71,7 @@ describe('vue-class-component', () => {
     const getterDecorator = (value: any) => (_: any, __: any): any => {
       return {
         enumerable: true,
-        get () {
+        get() {
           return value
         }
       }
@@ -97,7 +97,7 @@ describe('vue-class-component', () => {
       $store: any
       foo: string = 'Hello, ' + this.$store.state.msg
 
-      beforeCreate () {
+      beforeCreate() {
         this.$store = {
           state: {
             msg: 'world'
@@ -115,7 +115,7 @@ describe('vue-class-component', () => {
 
     @Component
     class MyComp extends Vue {
-      hello () {
+      hello() {
         msg = 'hi'
       }
     }
@@ -129,12 +129,12 @@ describe('vue-class-component', () => {
     @Component
     class MyComp extends Vue {
       a!: number
-      data () {
+      data() {
         return {
           a: 1
         }
       }
-      get b () {
+      get b() {
         return this.a + 1
       }
     }
@@ -149,7 +149,7 @@ describe('vue-class-component', () => {
   describe('name', () => {
     it('via name option', () => {
       @Component({ name: 'test' })
-      class MyComp extends Vue {}
+      class MyComp extends Vue { }
 
       const c = new MyComp()
       expect(c.$options.name).to.equal('test')
@@ -167,7 +167,7 @@ describe('vue-class-component', () => {
 
     it('via class name', () => {
       @Component
-      class MyComp extends Vue {}
+      class MyComp extends Vue { }
 
       const c = new MyComp()
       expect(c.$options.name).to.equal('MyComp')
@@ -184,7 +184,7 @@ describe('vue-class-component', () => {
     })
     class MyComp extends Vue {
       a!: number
-      data () {
+      data() {
         return { a: 1 }
       }
     }
@@ -201,7 +201,7 @@ describe('vue-class-component', () => {
     @Component
     class Base extends Vue {
       a!: number
-      data (): any {
+      data(): any {
         return { a: 1 }
       }
     }
@@ -209,7 +209,7 @@ describe('vue-class-component', () => {
     @Component
     class A extends Base {
       b!: number
-      data (): any {
+      data(): any {
         return { b: 2 }
       }
     }
@@ -235,13 +235,13 @@ describe('vue-class-component', () => {
       count = 0
 
       @Watch('count')
-      notify () {
+      notify() {
         spy()
       }
     }
 
     @Component
-    class A extends Base {}
+    class A extends Base { }
 
     const vm = new A()
     vm.count++
@@ -268,7 +268,7 @@ describe('vue-class-component', () => {
     @Component
     class MyComp extends Vue {
       @Prop foo!: string
-      @NoCache get bar (): string {
+      @NoCache get bar(): string {
         return 'world'
       }
     }
@@ -333,7 +333,7 @@ describe('vue-class-component', () => {
 
     @Component
     @DataMixin
-    class MyComp extends Vue {}
+    class MyComp extends Vue { }
 
     const vm: any = new MyComp()
     expect(vm.test).to.equal('foo')
@@ -344,7 +344,7 @@ describe('vue-class-component', () => {
     class MyComp extends Vue {
       static myValue = 52
 
-      static myFunc () {
+      static myFunc() {
         return 42
       }
     }
@@ -386,19 +386,38 @@ describe('vue-class-component', () => {
     }
 
     @Component
-    class MyComp extends mixins(MixinA, MixinB) {
-      test () {
+    class MixinC extends Vue {
+      valueC = 'mixin-c'
+    }
+
+    @Component
+    class ExtenderComp extends mixins(MixinC) {
+      extenderTest() {
+        this.valueC = 'extender-comp'
+      }
+    }
+
+    interface MyComp extends ExtenderComp, MixinA, MixinB { };
+
+    @Component<MyComp>({
+      mixins: [MixinA, MixinB]
+    })
+    class MyComp extends ExtenderComp {
+      test() {
         this.valueA = 'hi'
         this.valueB = 456
+        this.extenderTest();
       }
     }
 
     const vm = new MyComp()
     expect(vm.valueA).to.equal('hello')
     expect(vm.valueB).to.equal(123)
+    expect(vm.valueC).to.equal('mixin-c')
     vm.test()
     expect(vm.valueA).to.equal('hi')
     expect(vm.valueB).to.equal(456)
+    expect(vm.valueC).to.equal('extender-comp')
   })
 
   it('copies reflection metadata', function () {
@@ -411,12 +430,12 @@ describe('vue-class-component', () => {
       private _test: boolean = false
 
       @Reflect.metadata('worksMethod', true)
-      test (): void {
+      test(): void {
         void 0
       }
 
       @Reflect.metadata('worksAccessor', true)
-      get testAccessor (): boolean {
+      get testAccessor(): boolean {
         return this._test
       }
     }
